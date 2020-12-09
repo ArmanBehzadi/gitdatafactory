@@ -169,16 +169,6 @@
 										"sink": {
 											"name": "Address"
 										}
-									},
-									{
-										"source": {
-											"name": "Conact_BIOD",
-											"physicalType": "varchar"
-										},
-										"sink": {
-											"name": "Contact_Key",
-											"precision": 10
-										}
 									}
 								],
 								"typeConversion": true,
