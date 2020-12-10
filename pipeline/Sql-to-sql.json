@@ -24,6 +24,8 @@
 						"type": "AzureSqlSink"
 					},
 					"enableStaging": false,
+					"parallelCopies": 1,
+					"enableSkipIncompatibleRow": false,
 					"translator": {
 						"type": "TabularTranslator",
 						"mappings": [
