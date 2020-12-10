@@ -23,8 +23,9 @@
 				"type": "varchar"
 			},
 			{
-				"name": "Conact_BIOD",
-				"type": "varchar"
+				"name": "Contact_BOID",
+				"type": "int",
+				"precision": 10
 			}
 		],
 		"typeProperties": {

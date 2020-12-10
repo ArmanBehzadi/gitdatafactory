@@ -9,7 +9,7 @@
 						"referenceName": "AzureSqlTable1",
 						"type": "DatasetReference"
 					},
-					"name": "SourceSQL"
+					"name": "source1"
 				}
 			],
 			"sinks": [
@@ -29,7 +29,7 @@
 					"name": "ChangeColumnNamesToParquetFormat"
 				}
 			],
-			"script": "source(output(\n\t\tName as string,\n\t\tAddress as string,\n\t\tConact_BIOD as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> SourceSQL\nChangeColumnNamesToParquetFormat alterRow(updateIf(true()),\n\tdeleteIf(true()),\n\tupsertIf(true())) ~> AlterRow1\nSourceSQL select(skipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ChangeColumnNamesToParquetFormat\nAlterRow1 sink(input(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_Key as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:true,\n\tinsertable:true,\n\tupdateable:true,\n\tupsertable:true,\n\tkeys:['Contact_Key'],\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> SinkSQL"
+			"script": "source(output(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> source1\nChangeColumnNamesToParquetFormat alterRow(updateIf(true()),\n\tdeleteIf(true()),\n\tupsertIf(true())) ~> AlterRow1\nsource1 select(mapColumn(\n\t\tName,\n\t\tAddress,\n\t\tContactBOID = Contact_BOID\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ChangeColumnNamesToParquetFormat\nAlterRow1 sink(input(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_Key as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:true,\n\tinsertable:true,\n\tupdateable:true,\n\tupsertable:true,\n\tkeys:['Contact_Key'],\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> SinkSQL"
 		}
 	}
 }
