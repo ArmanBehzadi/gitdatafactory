@@ -17,9 +17,8 @@
 				"type": "varchar"
 			},
 			{
-				"name": "Contact_Key",
-				"type": "int",
-				"precision": 10
+				"name": "Contact_BOID",
+				"type": "varchar"
 			}
 		],
 		"typeProperties": {
