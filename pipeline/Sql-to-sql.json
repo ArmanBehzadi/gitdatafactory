@@ -145,7 +145,13 @@
 						]
 					}
 				],
-				"userProperties": []
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"annotations": []
