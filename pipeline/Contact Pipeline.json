@@ -71,7 +71,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "AzureSqlTable1",
+						"referenceName": "Contact_Table",
 						"type": "DatasetReference",
 						"parameters": {
 							"testParameter": "EntityCheck"
@@ -80,7 +80,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "AzureSqlTableSink",
+						"referenceName": "Coverage_Table",
 						"type": "DatasetReference"
 					}
 				]

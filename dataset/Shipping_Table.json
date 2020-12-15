@@ -1,36 +1,44 @@
 {
-	"name": "Contact_Table",
+	"name": "Shipping_Table",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "DataFactoryLinkedServicesSQL",
 			"type": "LinkedServiceReference"
 		},
-		"parameters": {
-			"testParameter": {
-				"type": "object",
-				"defaultValue": "EntityCheck"
-			}
-		},
 		"annotations": [],
 		"type": "AzureSqlTable",
 		"schema": [
 			{
-				"name": "Name",
+				"name": "Entity",
 				"type": "varchar"
 			},
 			{
-				"name": "Address",
+				"name": "Status_Process",
 				"type": "varchar"
 			},
 			{
-				"name": "Contact_BOID",
+				"name": "ErrorCode",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Error_Description",
+				"type": "varchar"
+			},
+			{
+				"name": "Retry_Count",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Priority",
 				"type": "int",
 				"precision": 10
 			}
 		],
 		"typeProperties": {
 			"schema": "dbo",
-			"table": "Contact"
+			"table": "ShippingTable"
 		}
 	}
 }
