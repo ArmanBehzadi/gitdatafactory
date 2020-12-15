@@ -1,11 +1,11 @@
 {
-	"name": "TriggerTableContact",
+	"name": "CoverageTrigger",
 	"properties": {
 		"annotations": [],
 		"runtimeState": "Started",
 		"pipeline": {
 			"pipelineReference": {
-				"referenceName": "Contact Pipeline",
+				"referenceName": "Coverage Pipeline",
 				"type": "PipelineReference"
 			}
 		},
@@ -13,13 +13,21 @@
 		"typeProperties": {
 			"frequency": "Minute",
 			"interval": 15,
-			"startTime": "2020-12-14T14:36:00.000Z",
+			"startTime": "2020-12-15T13:25:00.000Z",
 			"delay": "00:00:00",
 			"maxConcurrency": 50,
 			"retryPolicy": {
 				"intervalInSeconds": 30
 			},
-			"dependsOn": []
+			"dependsOn": [
+				{
+					"type": "TumblingWindowTriggerDependencyReference",
+					"referenceTrigger": {
+						"referenceName": "TriggerTableContact",
+						"type": "TriggerReference"
+					}
+				}
+			]
 		}
 	}
 }

@@ -1,5 +1,5 @@
 {
-	"name": "Sql-to-sql",
+	"name": "Contact Pipeline",
 	"properties": {
 		"activities": [
 			{
@@ -18,7 +18,11 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"queryTimeout": "02:00:00",
-						"partitionOption": "None"
+						"partitionOption": "DynamicRange",
+						"partitionSettings": {
+							"partitionUpperBound": "",
+							"partitionLowerBound": ""
+						}
 					},
 					"sink": {
 						"type": "AzureSqlSink"
@@ -82,6 +86,7 @@
 				]
 			}
 		],
+		"concurrency": 1,
 		"annotations": []
 	}
 }
