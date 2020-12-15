@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "SQLtoSQL",
+				"name": "Copy Contact",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
