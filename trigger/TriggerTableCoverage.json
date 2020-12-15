@@ -15,7 +15,7 @@
 			"interval": 15,
 			"startTime": "2020-12-14T14:44:00.000Z",
 			"delay": "00:00:00",
-			"maxConcurrency": 50,
+			"maxConcurrency": 1,
 			"retryPolicy": {
 				"intervalInSeconds": 30
 			},

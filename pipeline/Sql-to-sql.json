@@ -25,7 +25,7 @@
 					},
 					"enableStaging": false,
 					"parallelCopies": 1,
-					"enableSkipIncompatibleRow": false,
+					"enableSkipIncompatibleRow": true,
 					"translator": {
 						"type": "TabularTranslator",
 						"mappings": [
