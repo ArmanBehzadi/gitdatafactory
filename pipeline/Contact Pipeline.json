@@ -44,13 +44,6 @@
 					},
 					"translator": {
 						"type": "TabularTranslator",
-						"mappings": [
-							{
-								"sink": {
-									"name": ""
-								}
-							}
-						],
 						"typeConversion": true,
 						"typeConversionSettings": {
 							"allowDataTruncation": true,
