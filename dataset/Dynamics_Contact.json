@@ -1,0 +1,15 @@
+{
+	"name": "Dynamics_Contact",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Dynamics 365 ipt",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DynamicsEntity",
+		"schema": [],
+		"typeProperties": {
+			"entityName": "contact"
+		}
+	}
+}
