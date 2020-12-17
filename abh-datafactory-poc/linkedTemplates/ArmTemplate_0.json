@@ -55,6 +55,26 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Dynamics 365 ipt')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Dynamics",
+				"typeProperties": {
+					"deploymentType": "Online",
+					"serviceUri": "https://org992ec074.crm4.dynamics.com/",
+					"authenticationType": "Office365",
+					"username": "[parameters('Dynamics 365 ipt_properties_typeProperties_username')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('Dynamics 365 ipt_password')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/TriggerTableContact')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -77,26 +97,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Dynamics 365 ipt')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "Dynamics",
-				"typeProperties": {
-					"deploymentType": "Online",
-					"serviceUri": "https://org992ec074.crm4.dynamics.com/",
-					"authenticationType": "Office365",
-					"username": "[parameters('Dynamics 365 ipt_properties_typeProperties_username')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('Dynamics 365 ipt_password')]"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/Contact_Table')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -107,21 +107,7 @@
 				},
 				"annotations": [],
 				"type": "AzureSqlTable",
-				"schema": [
-					{
-						"name": "Name",
-						"type": "varchar"
-					},
-					{
-						"name": "Address",
-						"type": "varchar"
-					},
-					{
-						"name": "Contact_BOID",
-						"type": "int",
-						"precision": 10
-					}
-				],
+				"schema": [],
 				"typeProperties": {
 					"schema": "dbo",
 					"table": "Contact"
@@ -163,6 +149,26 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabaseSink')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Dynamics_Contact')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Dynamics 365 ipt",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DynamicsEntity",
+				"schema": [],
+				"typeProperties": {
+					"entityName": "contact"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Dynamics 365 ipt')]"
 			]
 		},
 		{
@@ -279,26 +285,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Dynamics_Contact')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "Dynamics 365 ipt",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DynamicsEntity",
-				"schema": [],
-				"typeProperties": {
-					"entityName": "contact"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/Dynamics 365 ipt')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/Contact Pipeline')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -320,11 +306,7 @@
 							"source": {
 								"type": "AzureSqlSource",
 								"queryTimeout": "02:00:00",
-								"partitionOption": "DynamicRange",
-								"partitionSettings": {
-									"partitionUpperBound": "",
-									"partitionLowerBound": ""
-								}
+								"partitionOption": "None"
 							},
 							"sink": {
 								"type": "DynamicsSink",
@@ -339,12 +321,11 @@
 								"mappings": [
 									{
 										"source": {
-											"name": "Address",
-											"physicalType": "varchar"
+											"name": "Address"
 										},
 										"sink": {
-											"name": "address1_city",
-											"type": "String"
+											"name": "accountid",
+											"type": "Guid"
 										}
 									}
 								],
@@ -431,20 +412,13 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/SqlFLowSql')]",
+			"name": "[concat(parameters('factoryName'), '/Transfer_All_Data')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"type": "MappingDataFlow",
 				"typeProperties": {
 					"sources": [
-						{
-							"dataset": {
-								"referenceName": "Contact_Table",
-								"type": "DatasetReference"
-							},
-							"name": "Source"
-						},
 						{
 							"dataset": {
 								"referenceName": "Coverage_Table",
@@ -459,7 +433,7 @@
 								"referenceName": "Coverage_Table",
 								"type": "DatasetReference"
 							},
-							"name": "SinkSQL"
+							"name": "sink1"
 						}
 					],
 					"transformations": [
@@ -468,16 +442,12 @@
 						},
 						{
 							"name": "ChangeColumnNamesToParquetFormat"
-						},
-						{
-							"name": "Exists1"
 						}
 					],
-					"script": "source(output(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> Source\nsource(output(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> ShippingTable\nChangeColumnNamesToParquetFormat alterRow(upsertIf(true())) ~> Upsert\nExists1 select(mapColumn(\n\t\tName,\n\t\tAddress,\n\t\tContactBOID = Contact_BOID\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ChangeColumnNamesToParquetFormat\nSource, ShippingTable exists(Source@Name == ShippingTable@Name,\n\tnegate:false,\n\tbroadcast: 'auto')~> Exists1\nUpsert sink(input(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:true,\n\tinsertable:true,\n\tupdateable:true,\n\tupsertable:true,\n\tkeys:['Contact_Key'],\n\tformat: 'table',\n\tmapColumn(\n\t\tName,\n\t\tAddress,\n\t\tContact_Key = ContactBOID\n\t),\n\tpartitionBy('roundRobin', 2),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> SinkSQL"
+					"script": "source(output(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> ShippingTable\nChangeColumnNamesToParquetFormat alterRow(upsertIf(true())) ~> Upsert\nShippingTable select(mapColumn(\n\t\tName,\n\t\tAddress,\n\t\tContactBOID = Contact_BOID\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ChangeColumnNamesToParquetFormat\nUpsert sink(input(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> sink1"
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/Contact_Table')]",
 				"[concat(variables('factoryId'), '/datasets/Coverage_Table')]"
 			]
 		}
