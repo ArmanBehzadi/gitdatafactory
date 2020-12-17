@@ -15,6 +15,14 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'DataFactoryLinkedServicesSQL'"
 		},
+		"Dynamics 365 ipt_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'Dynamics 365 ipt'"
+		},
+		"Dynamics 365 ipt_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "arman.behzadirad@ipt.ch"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -47,6 +55,12 @@
 					},
 					"DataFactoryLinkedServicesSQL_connectionString": {
 						"value": "[parameters('DataFactoryLinkedServicesSQL_connectionString')]"
+					},
+					"Dynamics 365 ipt_password": {
+						"value": "[parameters('Dynamics 365 ipt_password')]"
+					},
+					"Dynamics 365 ipt_properties_typeProperties_username": {
+						"value": "[parameters('Dynamics 365 ipt_properties_typeProperties_username')]"
 					}
 				}
 			},

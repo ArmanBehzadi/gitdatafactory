@@ -14,6 +14,14 @@
 		"DataFactoryLinkedServicesSQL_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'DataFactoryLinkedServicesSQL'"
+		},
+		"Dynamics 365 ipt_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'Dynamics 365 ipt'"
+		},
+		"Dynamics 365 ipt_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "arman.behzadirad@ipt.ch"
 		}
 	},
 	"variables": {
@@ -64,6 +72,26 @@
 						"intervalInSeconds": 30
 					},
 					"dependsOn": []
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Dynamics 365 ipt')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Dynamics",
+				"typeProperties": {
+					"deploymentType": "Online",
+					"serviceUri": "https://org992ec074.crm4.dynamics.com/",
+					"authenticationType": "Office365",
+					"username": "[parameters('Dynamics 365 ipt_properties_typeProperties_username')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('Dynamics 365 ipt_password')]"
+					}
 				}
 			},
 			"dependsOn": []
@@ -254,6 +282,26 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/triggers/TriggerTableContact')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Dynamics_Contact')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Dynamics 365 ipt",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DynamicsEntity",
+				"schema": [],
+				"typeProperties": {
+					"entityName": "contact"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Dynamics 365 ipt')]"
 			]
 		},
 		{

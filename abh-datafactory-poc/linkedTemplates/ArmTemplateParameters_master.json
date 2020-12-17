@@ -11,6 +11,12 @@
 		"DataFactoryLinkedServicesSQL_connectionString": {
 			"value": ""
 		},
+		"Dynamics 365 ipt_password": {
+			"value": ""
+		},
+		"Dynamics 365 ipt_properties_typeProperties_username": {
+			"value": "arman.behzadirad@ipt.ch"
+		},
 		"containerUri": {
 			"value": ""
 		},
