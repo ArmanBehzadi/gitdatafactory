@@ -30,12 +30,12 @@
 							{
 								"source": {
 									"name": "Contact_BOID",
-									"physicalType": "int",
-									"precision": 10
+									"physicalType": "varchar"
 								},
 								"sink": {
 									"name": "Contact_BOID",
-									"physicalType": "varchar"
+									"physicalType": "int",
+									"precision": 10
 								}
 							}
 						],
@@ -48,13 +48,13 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "Contact_Table",
+						"referenceName": "Conctact_Sink",
 						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "Conctact_Sink",
+						"referenceName": "Contact_Table",
 						"type": "DatasetReference"
 					}
 				]
