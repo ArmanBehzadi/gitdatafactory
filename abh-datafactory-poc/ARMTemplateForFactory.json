@@ -7,6 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "abh-datafactory-poc"
 		},
+		"AzureBlobStorage1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
+		},
 		"AzureSqlDatabaseSink_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabaseSink'"
@@ -59,7 +63,21 @@
 							},
 							"enableStaging": false,
 							"parallelCopies": 1,
-							"enableSkipIncompatibleRow": true,
+							"enableSkipIncompatibleRow": false,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "AzureBlobStorage1",
+										"type": "LinkedServiceReference"
+									},
+									"path": "errrorcontainer"
+								}
+							},
 							"translator": {
 								"type": "TabularTranslator",
 								"mappings": [
@@ -94,6 +112,43 @@
 								"parameters": {}
 							}
 						]
+					},
+					{
+						"name": "Transfer_All_Data",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "Copy Contact",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "Transfer_All_Data",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"ShippingTable": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
 					}
 				],
 				"concurrency": 1,
@@ -101,7 +156,9 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/Contact_Table')]",
-				"[concat(variables('factoryId'), '/datasets/Dynamics_Contact')]"
+				"[concat(variables('factoryId'), '/datasets/Dynamics_Contact')]",
+				"[concat(variables('factoryId'), '/dataflows/Transfer_All_Data')]",
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
 			]
 		},
 		{
@@ -231,6 +288,37 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/ErrorCSV')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "Mappe1.csv",
+						"container": "errrorcontainer"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Shipping_Table')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -278,6 +366,19 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/DataFactoryLinkedServicesSQL')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureBlobStorage1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureBlobStorage1_connectionString')]"
+				}
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/AzureSqlDatabaseSink')]",
@@ -421,33 +522,66 @@
 					"sources": [
 						{
 							"dataset": {
-								"referenceName": "Coverage_Table",
+								"referenceName": "ErrorCSV",
 								"type": "DatasetReference"
 							},
-							"name": "ShippingTable"
+							"name": "source1"
 						}
 					],
 					"sinks": [
 						{
 							"dataset": {
-								"referenceName": "Coverage_Table",
+								"referenceName": "Shipping_Table",
 								"type": "DatasetReference"
 							},
-							"name": "sink1"
+							"name": "ShippingTable"
 						}
 					],
 					"transformations": [
 						{
-							"name": "Upsert"
-						},
-						{
-							"name": "ChangeColumnNamesToParquetFormat"
+							"name": "Union1"
 						}
 					],
-					"script": "source(output(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> ShippingTable\nChangeColumnNamesToParquetFormat alterRow(upsertIf(true())) ~> Upsert\nShippingTable select(mapColumn(\n\t\tName,\n\t\tAddress,\n\t\tContactBOID = Contact_BOID\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ChangeColumnNamesToParquetFormat\nUpsert sink(input(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> sink1"
+					"script": "source(output(\n\t\tColumn_1 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource1 union(byName: true)~> Union1\nUnion1 sink(input(\n\t\tEntity as string,\n\t\tStatus_Process as string,\n\t\tErrorCode as integer,\n\t\tError_Description as string,\n\t\tRetry_Count as integer,\n\t\tPriority as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> ShippingTable"
 				}
 			},
 			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ErrorCSV')]",
+				"[concat(variables('factoryId'), '/datasets/Shipping_Table')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/WranglingDataFlow1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "WranglingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"name": "Shipping_Table",
+							"script": "",
+							"dataset": {
+								"referenceName": "Shipping_Table",
+								"type": "DatasetReference"
+							}
+						}
+					],
+					"sinks": [
+						{
+							"name": "Sink1",
+							"dataset": {
+								"referenceName": "Coverage_Table",
+								"type": "DatasetReference"
+							},
+							"script": "sink(input(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> Sink1"
+						}
+					],
+					"script": "section Section1;\r\nshared Shipping_Table = let\r\n  AdfDoc = Sql.Database(\"abh-sql-server.database.windows.net\", \"abh-sql-db\"),\r\n  InputTable = AdfDoc{[Schema = \"dbo\", Item = \"ShippingTable\"]}[Data]\r\nin\r\n  InputTable;\r\nshared UserQuery = let\r\n  Source = Shipping_Table\r\nin\r\n  Source;\r\n"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Shipping_Table')]",
 				"[concat(variables('factoryId'), '/datasets/Coverage_Table')]"
 			]
 		}

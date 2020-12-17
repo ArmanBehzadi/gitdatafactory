@@ -5,6 +5,9 @@
 		"factoryName": {
 			"value": "abh-datafactory-poc"
 		},
+		"AzureBlobStorage1_connectionString": {
+			"value": ""
+		},
 		"AzureSqlDatabaseSink_connectionString": {
 			"value": ""
 		},
