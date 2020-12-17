@@ -29,11 +29,12 @@
 						"mappings": [
 							{
 								"source": {
-									"name": "Name",
-									"physicalType": "varchar"
+									"name": "Contact_BOID",
+									"physicalType": "int",
+									"precision": 10
 								},
 								"sink": {
-									"name": "Name",
+									"name": "Contact_BOID",
 									"physicalType": "varchar"
 								}
 							}
