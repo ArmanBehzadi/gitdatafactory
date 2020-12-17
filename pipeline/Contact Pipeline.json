@@ -18,11 +18,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"queryTimeout": "02:00:00",
-						"partitionOption": "DynamicRange",
-						"partitionSettings": {
-							"partitionUpperBound": "",
-							"partitionLowerBound": ""
-						}
+						"partitionOption": "None"
 					},
 					"sink": {
 						"type": "DynamicsSink",
@@ -37,12 +33,11 @@
 						"mappings": [
 							{
 								"source": {
-									"name": "Address",
-									"physicalType": "varchar"
+									"name": "Address"
 								},
 								"sink": {
-									"name": "address1_city",
-									"type": "String"
+									"name": "accountid",
+									"type": "Guid"
 								}
 							}
 						],
