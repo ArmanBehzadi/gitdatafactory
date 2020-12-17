@@ -72,8 +72,7 @@
 								},
 								"sink": {
 									"name": "Contact_BOID",
-									"physicalType": "int",
-									"precision": 10
+									"physicalType": "varchar"
 								}
 							}
 						],
@@ -92,7 +91,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "Contact_Table",
+						"referenceName": "Coverage_Table",
 						"type": "DatasetReference"
 					}
 				]
