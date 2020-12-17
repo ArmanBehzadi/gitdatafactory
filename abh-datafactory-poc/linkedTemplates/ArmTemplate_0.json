@@ -47,7 +47,29 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/AzureSqlTable1')]",
+			"name": "[concat(parameters('factoryName'), '/TriggerTableContact')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"type": "TumblingWindowTrigger",
+				"typeProperties": {
+					"frequency": "Minute",
+					"interval": 15,
+					"startTime": "2020-12-14T14:36:00.000Z",
+					"delay": "00:00:00",
+					"maxConcurrency": 50,
+					"retryPolicy": {
+						"intervalInSeconds": 30
+					},
+					"dependsOn": []
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Contact_Table')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -88,7 +110,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/AzureSqlTableSink')]",
+			"name": "[concat(parameters('factoryName'), '/Coverage_Table')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -122,13 +144,126 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Sql-to-sql')]",
+			"name": "[concat(parameters('factoryName'), '/Shipping_Table')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DataFactoryLinkedServicesSQL",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Entity",
+						"type": "varchar"
+					},
+					{
+						"name": "Status_Process",
+						"type": "varchar"
+					},
+					{
+						"name": "ErrorCode",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Error_Description",
+						"type": "varchar"
+					},
+					{
+						"name": "Retry_Count",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Priority",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "ShippingTable"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DataFactoryLinkedServicesSQL')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CoverageTrigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"type": "TumblingWindowTrigger",
+				"typeProperties": {
+					"frequency": "Minute",
+					"interval": 15,
+					"startTime": "2020-12-15T13:25:00.000Z",
+					"delay": "00:00:00",
+					"maxConcurrency": 50,
+					"retryPolicy": {
+						"intervalInSeconds": 30
+					},
+					"dependsOn": [
+						{
+							"type": "TumblingWindowTriggerDependencyReference",
+							"referenceTrigger": {
+								"referenceName": "TriggerTableContact",
+								"type": "TriggerReference"
+							}
+						}
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/triggers/TriggerTableContact')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TriggerTableCoverage')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"type": "TumblingWindowTrigger",
+				"typeProperties": {
+					"frequency": "Minute",
+					"interval": 15,
+					"startTime": "2020-12-14T14:44:00.000Z",
+					"delay": "00:00:00",
+					"maxConcurrency": 1,
+					"retryPolicy": {
+						"intervalInSeconds": 30
+					},
+					"dependsOn": [
+						{
+							"type": "TumblingWindowTriggerDependencyReference",
+							"referenceTrigger": {
+								"referenceName": "TriggerTableContact",
+								"type": "TriggerReference"
+							}
+						}
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/triggers/TriggerTableContact')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Contact Pipeline')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "SQLtoSQL",
+						"name": "Copy Contact",
 						"type": "Copy",
 						"dependsOn": [],
 						"policy": {
@@ -143,14 +278,18 @@
 							"source": {
 								"type": "AzureSqlSource",
 								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
+								"partitionOption": "DynamicRange",
+								"partitionSettings": {
+									"partitionUpperBound": "",
+									"partitionLowerBound": ""
+								}
 							},
 							"sink": {
 								"type": "AzureSqlSink"
 							},
 							"enableStaging": false,
 							"parallelCopies": 1,
-							"enableSkipIncompatibleRow": false,
+							"enableSkipIncompatibleRow": true,
 							"translator": {
 								"type": "TabularTranslator",
 								"mappings": [
@@ -192,7 +331,7 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "AzureSqlTable1",
+								"referenceName": "Contact_Table",
 								"type": "DatasetReference",
 								"parameters": {
 									"testParameter": "EntityCheck"
@@ -201,7 +340,60 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "AzureSqlTableSink",
+								"referenceName": "Coverage_Table",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"concurrency": 1,
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Contact_Table')]",
+				"[concat(variables('factoryId'), '/datasets/Coverage_Table')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Coverage Pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy Coverage",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink"
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "Coverage_Table",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Coverage_Table",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -211,8 +403,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/AzureSqlTable1')]",
-				"[concat(variables('factoryId'), '/datasets/AzureSqlTableSink')]"
+				"[concat(variables('factoryId'), '/datasets/Coverage_Table')]"
 			]
 		},
 		{
@@ -225,23 +416,23 @@
 					"sources": [
 						{
 							"dataset": {
-								"referenceName": "AzureSqlTable1",
+								"referenceName": "Contact_Table",
 								"type": "DatasetReference"
 							},
 							"name": "Source"
 						},
 						{
 							"dataset": {
-								"referenceName": "AzureSqlTableSink",
+								"referenceName": "Coverage_Table",
 								"type": "DatasetReference"
 							},
-							"name": "source1"
+							"name": "ShippingTable"
 						}
 					],
 					"sinks": [
 						{
 							"dataset": {
-								"referenceName": "AzureSqlTableSink",
+								"referenceName": "Coverage_Table",
 								"type": "DatasetReference"
 							},
 							"name": "SinkSQL"
@@ -258,83 +449,12 @@
 							"name": "Exists1"
 						}
 					],
-					"script": "source(output(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> Source\nsource(output(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> source1\nChangeColumnNamesToParquetFormat alterRow(upsertIf(true())) ~> Upsert\nExists1 select(mapColumn(\n\t\tName,\n\t\tAddress,\n\t\tContactBOID = Contact_BOID\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ChangeColumnNamesToParquetFormat\nSource, source1 exists(negate:false,\n\tbroadcast: 'auto')~> Exists1\nUpsert sink(input(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:true,\n\tinsertable:true,\n\tupdateable:true,\n\tupsertable:true,\n\tkeys:['Contact_Key'],\n\tformat: 'table',\n\tmapColumn(\n\t\tName,\n\t\tAddress,\n\t\tContact_Key = ContactBOID\n\t),\n\tpartitionBy('roundRobin', 2),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> SinkSQL"
+					"script": "source(output(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> Source\nsource(output(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> ShippingTable\nChangeColumnNamesToParquetFormat alterRow(upsertIf(true())) ~> Upsert\nExists1 select(mapColumn(\n\t\tName,\n\t\tAddress,\n\t\tContactBOID = Contact_BOID\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ChangeColumnNamesToParquetFormat\nSource, ShippingTable exists(Source@Name == ShippingTable@Name,\n\tnegate:false,\n\tbroadcast: 'auto')~> Exists1\nUpsert sink(input(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:true,\n\tinsertable:true,\n\tupdateable:true,\n\tupsertable:true,\n\tkeys:['Contact_Key'],\n\tformat: 'table',\n\tmapColumn(\n\t\tName,\n\t\tAddress,\n\t\tContact_Key = ContactBOID\n\t),\n\tpartitionBy('roundRobin', 2),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> SinkSQL"
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/AzureSqlTable1')]",
-				"[concat(variables('factoryId'), '/datasets/AzureSqlTableSink')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/TriggerTableContact')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipeline": {
-					"pipelineReference": {
-						"referenceName": "Sql-to-sql",
-						"type": "PipelineReference"
-					},
-					"parameters": {}
-				},
-				"type": "TumblingWindowTrigger",
-				"typeProperties": {
-					"frequency": "Minute",
-					"interval": 15,
-					"startTime": "2020-12-14T14:36:00.000Z",
-					"delay": "00:00:00",
-					"maxConcurrency": 50,
-					"retryPolicy": {
-						"intervalInSeconds": 30
-					},
-					"dependsOn": []
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/Sql-to-sql')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/TriggerTableCoverage')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipeline": {
-					"pipelineReference": {
-						"referenceName": "Sql-to-sql",
-						"type": "PipelineReference"
-					},
-					"parameters": {}
-				},
-				"type": "TumblingWindowTrigger",
-				"typeProperties": {
-					"frequency": "Minute",
-					"interval": 15,
-					"startTime": "2020-12-14T14:44:00.000Z",
-					"delay": "00:00:00",
-					"maxConcurrency": 50,
-					"retryPolicy": {
-						"intervalInSeconds": 30
-					},
-					"dependsOn": [
-						{
-							"type": "TumblingWindowTriggerDependencyReference",
-							"referenceTrigger": {
-								"referenceName": "TriggerTableContact",
-								"type": "TriggerReference"
-							}
-						}
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/Sql-to-sql')]",
-				"[concat(variables('factoryId'), '/triggers/TriggerTableContact')]"
+				"[concat(variables('factoryId'), '/datasets/Contact_Table')]",
+				"[concat(variables('factoryId'), '/datasets/Coverage_Table')]"
 			]
 		}
 	]
