@@ -1,16 +1,9 @@
 {
-	"name": "SqlFLowSql",
+	"name": "Transfer_All_Data",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [
-				{
-					"dataset": {
-						"referenceName": "Contact_Table",
-						"type": "DatasetReference"
-					},
-					"name": "Source"
-				},
 				{
 					"dataset": {
 						"referenceName": "Coverage_Table",
@@ -19,15 +12,7 @@
 					"name": "ShippingTable"
 				}
 			],
-			"sinks": [
-				{
-					"dataset": {
-						"referenceName": "Coverage_Table",
-						"type": "DatasetReference"
-					},
-					"name": "SinkSQL"
-				}
-			],
+			"sinks": [],
 			"transformations": [
 				{
 					"name": "Upsert"
@@ -39,7 +24,7 @@
 					"name": "Exists1"
 				}
 			],
-			"script": "source(output(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> Source\nsource(output(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> ShippingTable\nChangeColumnNamesToParquetFormat alterRow(upsertIf(true())) ~> Upsert\nExists1 select(mapColumn(\n\t\tName,\n\t\tAddress,\n\t\tContactBOID = Contact_BOID\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ChangeColumnNamesToParquetFormat\nSource, ShippingTable exists(Source@Name == ShippingTable@Name,\n\tnegate:false,\n\tbroadcast: 'auto')~> Exists1\nUpsert sink(input(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:true,\n\tinsertable:true,\n\tupdateable:true,\n\tupsertable:true,\n\tkeys:['Contact_Key'],\n\tformat: 'table',\n\tmapColumn(\n\t\tName,\n\t\tAddress,\n\t\tContact_Key = ContactBOID\n\t),\n\tpartitionBy('roundRobin', 2),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> SinkSQL"
+			"script": "source(output(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> ShippingTable\nChangeColumnNamesToParquetFormat alterRow(upsertIf(true())) ~> Upsert\nExists1 select(mapColumn(\n\t\tName,\n\t\tAddress,\n\t\tContactBOID = Contact_BOID\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ChangeColumnNamesToParquetFormat\nShippingTable exists(Source@Name == ShippingTable@Name,\n\tnegate:false,\n\tbroadcast: 'auto')~> Exists1"
 		}
 	}
 }
