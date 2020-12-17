@@ -1,0 +1,29 @@
+{
+	"name": "WranglingDataFlow1",
+	"properties": {
+		"type": "WranglingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "Shipping_Table",
+					"script": "",
+					"dataset": {
+						"referenceName": "Shipping_Table",
+						"type": "DatasetReference"
+					}
+				}
+			],
+			"sinks": [
+				{
+					"name": "Sink1",
+					"dataset": {
+						"referenceName": "Coverage_Table",
+						"type": "DatasetReference"
+					},
+					"script": "sink(input(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> Sink1"
+				}
+			],
+			"script": "section Section1;\r\nshared Shipping_Table = let\r\n  AdfDoc = Sql.Database(\"abh-sql-server.database.windows.net\", \"abh-sql-db\"),\r\n  InputTable = AdfDoc{[Schema = \"dbo\", Item = \"ShippingTable\"]}[Data]\r\nin\r\n  InputTable;\r\nshared UserQuery = let\r\n  Source = Shipping_Table\r\nin\r\n  Source;\r\n"
+		}
+	}
+}

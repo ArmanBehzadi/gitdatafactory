@@ -6,30 +6,27 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "Coverage_Table",
+						"referenceName": "ErrorCSV",
 						"type": "DatasetReference"
 					},
-					"name": "ShippingTable"
+					"name": "source1"
 				}
 			],
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "Coverage_Table",
+						"referenceName": "Shipping_Table",
 						"type": "DatasetReference"
 					},
-					"name": "sink1"
+					"name": "Shipping_Table"
 				}
 			],
 			"transformations": [
 				{
-					"name": "Upsert"
-				},
-				{
-					"name": "ChangeColumnNamesToParquetFormat"
+					"name": "Union1"
 				}
 			],
-			"script": "source(output(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> ShippingTable\nChangeColumnNamesToParquetFormat alterRow(upsertIf(true())) ~> Upsert\nShippingTable select(mapColumn(\n\t\tName,\n\t\tAddress,\n\t\tContactBOID = Contact_BOID\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ChangeColumnNamesToParquetFormat\nUpsert sink(input(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> sink1"
+			"script": "source(output(\n\t\tColumn_1 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource1 union(byName: true)~> Union1\nUnion1 sink(input(\n\t\tEntity as string,\n\t\tStatus_Process as string,\n\t\tErrorCode as integer,\n\t\tError_Description as string,\n\t\tRetry_Count as integer,\n\t\tPriority as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> Shipping_Table"
 		}
 	}
 }
