@@ -27,13 +27,13 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "Coverage_Table",
+						"referenceName": "Conctact_Sink",
 						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "Coverage_Table",
+						"referenceName": "Conctact_Sink",
 						"type": "DatasetReference"
 					}
 				]

@@ -1,5 +1,5 @@
 {
-	"name": "Coverage_Table",
+	"name": "Conctact_Sink",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureSqlDatabaseSink",

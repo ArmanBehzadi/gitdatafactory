@@ -17,7 +17,7 @@
 				{
 					"name": "Sink1",
 					"dataset": {
-						"referenceName": "Coverage_Table",
+						"referenceName": "Conctact_Sink",
 						"type": "DatasetReference"
 					},
 					"script": "sink(input(\n\t\tName as string,\n\t\tAddress as string,\n\t\tContact_BOID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> Sink1"

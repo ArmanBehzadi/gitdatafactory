@@ -24,20 +24,6 @@
 						"type": "AzureSqlSink"
 					},
 					"enableStaging": false,
-					"logSettings": {
-						"enableCopyActivityLog": true,
-						"copyActivityLogSettings": {
-							"logLevel": "Warning",
-							"enableReliableLogging": false
-						},
-						"logLocationSettings": {
-							"linkedServiceName": {
-								"referenceName": "AzureBlobStorage1",
-								"type": "LinkedServiceReference"
-							},
-							"path": "errrorcontainer"
-						}
-					},
 					"translator": {
 						"type": "TabularTranslator",
 						"mappings": [
@@ -47,7 +33,7 @@
 									"physicalType": "varchar"
 								},
 								"sink": {
-									"name": "Contact_BOID",
+									"name": "Name",
 									"physicalType": "varchar"
 								}
 							}
@@ -67,7 +53,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "Coverage_Table",
+						"referenceName": "Conctact_Sink",
 						"type": "DatasetReference"
 					}
 				]
