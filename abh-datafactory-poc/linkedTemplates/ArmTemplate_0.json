@@ -380,12 +380,12 @@
 									{
 										"source": {
 											"name": "Contact_BOID",
-											"physicalType": "int",
-											"precision": 10
+											"physicalType": "varchar"
 										},
 										"sink": {
 											"name": "Contact_BOID",
-											"physicalType": "varchar"
+											"physicalType": "int",
+											"precision": 10
 										}
 									}
 								],
@@ -398,14 +398,14 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "Contact_Table",
+								"referenceName": "Conctact_Sink",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
 						],
 						"outputs": [
 							{
-								"referenceName": "Conctact_Sink",
+								"referenceName": "Contact_Table",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -416,8 +416,8 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/Contact_Table')]",
-				"[concat(variables('factoryId'), '/datasets/Conctact_Sink')]"
+				"[concat(variables('factoryId'), '/datasets/Conctact_Sink')]",
+				"[concat(variables('factoryId'), '/datasets/Contact_Table')]"
 			]
 		},
 		{
