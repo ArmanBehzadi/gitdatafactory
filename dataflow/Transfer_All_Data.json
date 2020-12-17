@@ -18,7 +18,7 @@
 						"referenceName": "Shipping_Table",
 						"type": "DatasetReference"
 					},
-					"name": "Shipping_Table"
+					"name": "ShippingTable"
 				}
 			],
 			"transformations": [
@@ -26,7 +26,7 @@
 					"name": "Union1"
 				}
 			],
-			"script": "source(output(\n\t\tColumn_1 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource1 union(byName: true)~> Union1\nUnion1 sink(input(\n\t\tEntity as string,\n\t\tStatus_Process as string,\n\t\tErrorCode as integer,\n\t\tError_Description as string,\n\t\tRetry_Count as integer,\n\t\tPriority as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> Shipping_Table"
+			"script": "source(output(\n\t\tColumn_1 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource1 union(byName: true)~> Union1\nUnion1 sink(input(\n\t\tEntity as string,\n\t\tStatus_Process as string,\n\t\tErrorCode as integer,\n\t\tError_Description as string,\n\t\tRetry_Count as integer,\n\t\tPriority as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> ShippingTable"
 		}
 	}
 }
