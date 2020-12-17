@@ -34,7 +34,8 @@
 							"linkedServiceName": {
 								"referenceName": "AzureBlobStorage1",
 								"type": "LinkedServiceReference"
-							}
+							},
+							"path": "errrorcontainer"
 						}
 					},
 					"translator": {
