@@ -57,7 +57,9 @@
 								}
 							},
 							"sink": {
-								"type": "AzureSqlSink"
+								"type": "DynamicsSink",
+								"writeBatchSize": 10,
+								"writeBehavior": "upsert"
 							},
 							"enableStaging": false,
 							"parallelCopies": 1,
@@ -67,30 +69,12 @@
 								"mappings": [
 									{
 										"source": {
-											"name": "Name",
-											"physicalType": "varchar"
-										},
-										"sink": {
-											"name": "Name"
-										}
-									},
-									{
-										"source": {
 											"name": "Address",
 											"physicalType": "varchar"
 										},
 										"sink": {
-											"name": "Address"
-										}
-									},
-									{
-										"source": {
-											"name": "Conact_BIOD",
-											"physicalType": "varchar"
-										},
-										"sink": {
-											"name": "Contact_Key",
-											"precision": 10
+											"name": "address1_city",
+											"type": "String"
 										}
 									}
 								],
@@ -105,14 +89,12 @@
 							{
 								"referenceName": "Contact_Table",
 								"type": "DatasetReference",
-								"parameters": {
-									"testParameter": "EntityCheck"
-								}
+								"parameters": {}
 							}
 						],
 						"outputs": [
 							{
-								"referenceName": "Coverage_Table",
+								"referenceName": "Dynamics_Contact",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -124,7 +106,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/Contact_Table')]",
-				"[concat(variables('factoryId'), '/datasets/Coverage_Table')]"
+				"[concat(variables('factoryId'), '/datasets/Dynamics_Contact')]"
 			]
 		},
 		{
@@ -186,12 +168,6 @@
 				"linkedServiceName": {
 					"referenceName": "DataFactoryLinkedServicesSQL",
 					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"testParameter": {
-						"type": "object",
-						"defaultValue": "EntityCheck"
-					}
 				},
 				"annotations": [],
 				"type": "AzureSqlTable",
