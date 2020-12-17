@@ -90,6 +90,20 @@
 								"type": "AzureSqlSink"
 							},
 							"enableStaging": false,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "AzureBlobStorage1",
+										"type": "LinkedServiceReference"
+									},
+									"path": "errrorcontainer"
+								}
+							},
 							"translator": {
 								"type": "TabularTranslator",
 								"mappings": [
@@ -100,8 +114,7 @@
 										},
 										"sink": {
 											"name": "Contact_BOID",
-											"physicalType": "int",
-											"precision": 10
+											"physicalType": "varchar"
 										}
 									}
 								],
@@ -121,7 +134,7 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "Contact_Table",
+								"referenceName": "Coverage_Table",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -133,7 +146,9 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/Transfer_All_Data')]",
-				"[concat(variables('factoryId'), '/datasets/Contact_Table')]"
+				"[concat(variables('factoryId'), '/datasets/Contact_Table')]",
+				"[concat(variables('factoryId'), '/datasets/Coverage_Table')]",
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
 			]
 		},
 		{
