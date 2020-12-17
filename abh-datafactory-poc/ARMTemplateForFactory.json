@@ -39,36 +39,6 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "Transfer_All_Data",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "Transfer_All_Data",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"source1": {},
-									"ShippingTable": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					},
-					{
 						"name": "Copy data1",
 						"type": "Copy",
 						"dependsOn": [],
@@ -145,7 +115,6 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/Transfer_All_Data')]",
 				"[concat(variables('factoryId'), '/datasets/Contact_Table')]",
 				"[concat(variables('factoryId'), '/datasets/Coverage_Table')]",
 				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
