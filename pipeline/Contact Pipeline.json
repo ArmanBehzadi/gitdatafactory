@@ -25,7 +25,9 @@
 						}
 					},
 					"sink": {
-						"type": "AzureSqlSink"
+						"type": "DynamicsSink",
+						"writeBatchSize": 10,
+						"writeBehavior": "upsert"
 					},
 					"enableStaging": false,
 					"parallelCopies": 1,
@@ -35,30 +37,12 @@
 						"mappings": [
 							{
 								"source": {
-									"name": "Name",
-									"physicalType": "varchar"
-								},
-								"sink": {
-									"name": "Name"
-								}
-							},
-							{
-								"source": {
 									"name": "Address",
 									"physicalType": "varchar"
 								},
 								"sink": {
-									"name": "Address"
-								}
-							},
-							{
-								"source": {
-									"name": "Conact_BIOD",
-									"physicalType": "varchar"
-								},
-								"sink": {
-									"name": "Contact_Key",
-									"precision": 10
+									"name": "address1_city",
+									"type": "String"
 								}
 							}
 						],
@@ -72,15 +56,12 @@
 				"inputs": [
 					{
 						"referenceName": "Contact_Table",
-						"type": "DatasetReference",
-						"parameters": {
-							"testParameter": "EntityCheck"
-						}
+						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "Coverage_Table",
+						"referenceName": "Dynamics_Contact",
 						"type": "DatasetReference"
 					}
 				]

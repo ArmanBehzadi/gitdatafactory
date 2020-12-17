@@ -5,12 +5,6 @@
 			"referenceName": "DataFactoryLinkedServicesSQL",
 			"type": "LinkedServiceReference"
 		},
-		"parameters": {
-			"testParameter": {
-				"type": "object",
-				"defaultValue": "EntityCheck"
-			}
-		},
 		"annotations": [],
 		"type": "AzureSqlTable",
 		"schema": [
