@@ -3,11 +3,11 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Copy Activity",
+				"name": "Copy Activity Coverage",
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "Transfer_All_Data",
+						"activity": "Copy Activity Contact",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -149,6 +149,86 @@
 					}
 				],
 				"userProperties": []
+			},
+			{
+				"name": "Copy Activity Contact",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Set variable1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 5,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT * FROM SomeTable\n  WHERE timestampField >= TO_TIMESTAMP( '2020-12-01', 'yyyy-mm-dd' )\n    AND timestampField < TO_TIMESTAMP( '2013-12-19', 'yyyy-mm-dd')",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink"
+					},
+					"enableStaging": false,
+					"enableSkipIncompatibleRow": true,
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Warning",
+							"enableReliableLogging": false
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "AzureBlobStorage1",
+								"type": "LinkedServiceReference"
+							},
+							"path": "errrorcontainer"
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "Contact_BOID",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "Contact_BOID",
+									"physicalType": "int",
+									"precision": 10
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "Contact_Table",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "Contact_Table",
+						"type": "DatasetReference"
+					}
+				]
 			}
 		],
 		"concurrency": 1,
